@@ -3375,7 +3375,7 @@ static u8 save_if_interesting(char **argv, void *mem, u32 len, u8 fault)
       if (!stop_soon && new_fault == FAULT_CRASH)
         goto keep_as_crash;
 
-      //放宽限制后仍然超时，不用保留
+      //放宽限制后既不是crash也不是timeout ，不用保留
       if (stop_soon || new_fault != FAULT_TMOUT)
         return keeping;// =0
     }
@@ -8577,19 +8577,19 @@ int main(int argc, char **argv)
   bind_to_free_cpu(); //构建绑定到特定核心的进程列表。如果什么也找不到，返回-1
 #endif                /* HAVE_AFFINITY */
 
-  check_crash_handling(); //确保核心转储不会进入程序
-  check_cpu_governor();   //检查CPU管理者
+  check_crash_handling(); 
+  check_cpu_governor();   //检查CPU
 
-  setup_post(); //加载后处理器
-  setup_shm();  //设置共享内存块，初始化trace_bits参数并置为0
+  setup_post();
+  setup_shm(); 
   init_count_class16();
 
   setup_dirs_fds(); //设置输出目录和文件描述符
-  read_testcases(); //读取所有测试用例，对它进行排队测试，期间会调用add_to_queue函数（会对输入用例进行去重）
+  read_testcases(); //读取所有测试用例到队列，调用add_to_queue函数（会对输入用例进行去重）
   load_auto();      //字典处理
 
   pivot_inputs();
-  //输出目录中为输入测试用例创建硬链接，选择好名称并相应地旋转。使用函数link_or_copy重新命名并且拷贝；
+  //输出目录中为输入测试用例创建硬链接。使用函数link_or_copy重新命名并且拷贝；
   //使用函数mark_as_det_done为已经经过确定性变异（deterministic）阶段的testcase文件放入deterministic_done文件夹。
   //这样经过deterministic的testcase就不用浪费时间进行重复。
 
@@ -8602,11 +8602,11 @@ int main(int argc, char **argv)
   detect_file_args(argv + optind + 1);
 
   if (!out_file)
-    setup_stdio_file(); //设置文件输出目录
+    setup_stdio_file();
 
-  check_binary(argv[optind]); //检查二进制文件
+  check_binary(argv[optind]); //二进制文件检查
 
-  //从这里开始第一遍Fuzz
+  //开始Fuzz
   start_time = get_cur_time(); //获取开始时间
 
   if (qemu_mode) //检查是不是QEMU模式
